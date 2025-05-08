@@ -63,7 +63,7 @@ else:
 
         except subprocess.CalledProcessError as e:
             st.error(f"❌ A subprocess failed: {str(e)}")
-        except openai.error.OpenAIError as e:
+        except openai.OpenAIError as e:
             st.error(f"❌ OpenAI API error: {str(e)}")
         except Exception as e:
             st.error(f"❌ General error: {str(e)}")
