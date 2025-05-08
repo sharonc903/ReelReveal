@@ -18,7 +18,12 @@ else:
     if st.button("Analyze"):
         try:
             with st.spinner("Downloading video..."):
-                result = subprocess.run(["yt-dlp", video_url, "-o", "video.mp4"], check=True)
+                subprocess.run([
+                    "yt-dlp",
+                    "-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]",
+                    video_url,
+                    "-o", "video.mp4"
+                ], check=True)
 
             if not os.path.exists("video.mp4"):
                 st.error("❌ Video download failed — 'video.mp4' not found.")
@@ -62,7 +67,7 @@ else:
                         st.write(response['choices'][0]['message']['content'])
 
         except subprocess.CalledProcessError as e:
-            st.error(f"❌ A subprocess failed: {str(e)}")
+            st.error(f"❌ A subprocess failed:\n{str(e)}")
         except openai.OpenAIError as e:
             st.error(f"❌ OpenAI API error: {str(e)}")
         except Exception as e:
