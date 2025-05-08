@@ -1,8 +1,7 @@
 import streamlit as st
 import subprocess
-import whisper
-import openai
 import os
+import openai
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
@@ -16,11 +15,15 @@ if st.button("Analyze"):
         with st.spinner("Downloading video..."):
             subprocess.run(["yt-dlp", video_url, "-o", "video.mp4"], check=True)
 
-        with st.spinner("Transcribing audio..."):
-            model = whisper.load_model("base")
-            result = model.transcribe("video.mp4", language="he")
-            transcript = result["text"]
-            st.subheader("📝 Transcription")
+        with st.spinner("Transcribing with Whisper API..."):
+            audio_file_path = "audio.mp3"
+            subprocess.run(["ffmpeg", "-i", "video.mp4", "-ar", "16000", "-ac", "1", "-f", "mp3", audio_file_path], check=True)
+
+            with open(audio_file_path, "rb") as audio_file:
+                transcript_response = openai.Audio.transcribe("whisper-1", audio_file)
+                transcript = transcript_response["text"]
+
+            st.subheader("📝 Transcript")
             st.write(transcript)
 
         with st.spinner("Analyzing with GPT-4..."):
@@ -44,6 +47,6 @@ if st.button("Analyze"):
             st.write(response['choices'][0]['message']['content'])
 
     except subprocess.CalledProcessError:
-        st.error("Failed to download the video. Please check the link.")
+        st.error("Failed to download or convert the video. Please check the link.")
     except Exception as e:
         st.error(f"Error: {str(e)}")
