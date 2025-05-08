@@ -15,10 +15,14 @@ if st.button("Analyze"):
         with st.spinner("Downloading video..."):
             subprocess.run(["yt-dlp", video_url, "-o", "video.mp4"], check=True)
 
-        with st.spinner("Transcribing with Whisper API..."):
+        with st.spinner("Converting to audio..."):
             audio_file_path = "audio.mp3"
-            subprocess.run(["ffmpeg", "-i", "video.mp4", "-ar", "16000", "-ac", "1", "-f", "mp3", audio_file_path], check=True)
+            subprocess.run([
+                "ffmpeg", "-i", "video.mp4",
+                "-ar", "16000", "-ac", "1", "-f", "mp3", audio_file_path
+            ], check=True)
 
+        with st.spinner("Transcribing with Whisper API..."):
             with open(audio_file_path, "rb") as audio_file:
                 transcript_response = openai.Audio.transcribe("whisper-1", audio_file)
                 transcript = transcript_response["text"]
